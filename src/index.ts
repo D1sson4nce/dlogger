@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import * as fs from 'fs'
 import { inspect } from 'util'
 
@@ -14,9 +15,7 @@ export function Logged(directory?: string) {
             localPath: directory
         })
         
-        return class extends constructor {
-            __logger = logger
-        }
+        Reflect.defineMetadata("logger", logger, constructor)
     }
 }
 
@@ -31,13 +30,13 @@ let callIdCounter = 0;
  * @param {string[]} propertyNames if specified, any object parameter will omit all other properties from the log except the ones specified
  */
 export function Log(...propertyNames: string[] | [string[]]) {
-    return function (target: any, key: string, descriptor: PropertyDescriptor) {
+    return function (target: Type<Object>, key: string, descriptor: PropertyDescriptor) {
         let original = descriptor.value
 
         descriptor.value = function (...args: any[]) {
             const callId = callIdCounter++;
-            
-            const logger = <Logger>((this as any).__logger || Logger)
+
+            const logger = Reflect.getOwnMetadata("logger", target.constructor) || Logger
 
             const source = `${target.name ?? target.constructor.name}.${key}`
             const propertyKeys = propertyNames.flat()
@@ -45,9 +44,9 @@ export function Log(...propertyNames: string[] | [string[]]) {
             if (propertyKeys.length > 0) {
                 const filteredArgs = args.map(a => filterObject(a, propertyKeys))
 
-                logger.log(filteredArgs, `[${callId}] (${source}) arguements`)
+                logger.log(filteredArgs, `(${source}) [${callId}] arguements`)
             } else {
-                logger.log(args, `[${callId}] (${source}) arguements`)
+                logger.log(args, `(${source}) [${callId}] arguements`)
             }
 
             try {
@@ -58,17 +57,17 @@ export function Log(...propertyNames: string[] | [string[]]) {
                 Promise.resolve(result).then((r: any) => {
                     const end = performance.now()
 
-                    logger.log(r, `[${callId}] (${source}) return`)
+                    logger.log(r, `(${source}) [${callId}] return`)
                     
-                    if(logger.timer) logger.log(end - start, `[${callId}] (${source}) Elapsed time (ms)`)
+                    if(logger.timer) logger.log(end - start, `(${source}) [${callId}] Elapsed time (ms)`)
                 }).catch(error => {
-                    logger.log(error.message, `[${callId}] (${source}) error message`)
+                    logger.log(error.message, `(${source}) [${callId}] error message`)
                     throw error
                 })
 
                 return result
             } catch (error: any) {
-                logger.log(error.message, `[${callId}] (${source}) error message`)
+                logger.log(error.message, `(${source}) [${callId}] error message`)
                 throw error
             }
         }
@@ -144,10 +143,6 @@ export class Logger {
      * @param {string | undefined} pretext text that shows before the obj, to describe it
      */
     log(obj: any, pretext?: string) {
-        if(obj.__logger && obj.__logger instanceof Logger) {
-            delete obj.__logger
-        }
-
         if (pretext) {
             this.writeLine(`${pretext}: ${inspect(obj, { depth: Infinity, compact: this.compact })}`)
             return

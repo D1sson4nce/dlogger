@@ -8,17 +8,20 @@
     },
     "author": "Dissonance",
     "types": "dist/index.d.ts",
-    "files": ["/dist"],
+    "files": [
+        "/dist"
+    ],
     "license": "ISC",
     "repository": {
         "type": "git",
         "url": "https://github.com/D1sson4nce/dlogger.git"
     },
     "dependencies": {
-        "fs": "^0.0.1-security"
+        "fs": "^0.0.1-security",
+        "reflect-metadata": "^0.2.2"
     },
     "devDependencies": {
-        "typescript": "^6.0.2",
-        "@types/node": "^25.5.2"
+        "@types/node": "^25.5.2",
+        "typescript": "^6.0.2"
     }
 }

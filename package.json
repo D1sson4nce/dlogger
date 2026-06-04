@@ -14,7 +14,7 @@
     "license": "ISC",
     "repository": {
         "type": "git",
-        "url": "https://github.com/D1sson4nce/dlogger.git"
+        "url": "git+https://github.com/D1sson4nce/dlogger.git"
     },
     "dependencies": {
         "fs": "^0.0.1-security",

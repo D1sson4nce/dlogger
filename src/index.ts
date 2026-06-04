@@ -30,7 +30,7 @@ let callIdCounter = 0;
  * @param {string[]} propertyNames if specified, any object parameter will omit all other properties from the log except the ones specified
  */
 export function Log(...propertyNames: string[] | [string[]]) {
-    return function (target: Type<Object>, key: string, descriptor: PropertyDescriptor) {
+    return function (target: any, key: string, descriptor: PropertyDescriptor) {
         let original = descriptor.value
 
         descriptor.value = function (...args: any[]) {

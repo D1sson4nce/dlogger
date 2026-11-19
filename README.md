@@ -22,7 +22,10 @@ Logger.configure({
     instanceBased: false, //if set to true. behavior of your logger object will be relative the static logger. default: false
     localPath: "log", //path within it will make files. default: "log"
     timer: true, //time method calls. default: false
-    compact: false //compacts json objects when logged. default: true
+    compact: false, //compacts json objects when logged. default: true
+    outputFormat: "json" | "inspect", //whether the output should render in pure json or use inspect. default: "json"
+    defaultLogging: true //if set to false, it will no longer log to files specified in localPath. default: true
+    outputHandler?: (entry: logEntry) => void //if set, it will call this function when a logged method returns or throws an error 
 })
 ```
 
@@ -41,7 +44,7 @@ The log method takes an object, and can also take an extra object as pretext for
 const dog = { name: "Fido", age: 7, breed: "Golden" }
 Logger.log(dog, "Dog info")
 /*
-[2026-04-10 16:15:38] Dog info: { name: 'Fido', age: 7, breed: 'Golden' }
+[2026-11-19 10:10:08] Dog info: {"name":"Fido","age":7,"breed":"Golden"}
 */
 ```
 
@@ -98,4 +101,14 @@ class User {
 }
 
 //Logs from this class will end up in /logs/users
+```
+
+### Custom outout handling
+Under configure, you can specify an *outputHandler*, that is called when a method returns or throws an error.
+```typescript
+Logger.configure({
+    outputHandler: entry => {
+        DB.createRecord("log", entry)
+    }
+})
 ```
